@@ -10,58 +10,74 @@ of a Markdown file then do HTML conversion.
 import sys
 import os
 
-
-def convert_headings_to_html(md_content):
+def convert_to_html(md_content):
     """
-    Convert Markdown headings (# to ######) to HTML <h1> to <h6>.
-
-    Args:
-        md_content (list of str): Lines of Markdown text
-
-    Returns:
-        list of str: Lines of HTML text
-    """
-
-    html_lines = []
-
-    for line in md_content:
-        stripped = line.lstrip()
-        if stripped.startswith('#'):
-            # Count the number of '#' at the start (heading level)
-            level = 0
-            while level < len(stripped) and stripped[level] == '#':
-                level += 1
-            # Only consider headings level 1-6
-            if 1 <= level <= 6:
-                # Remove leading '#' and possible space
-                heading_text = stripped[level:].lstrip()
-                html_lines.append(f"<h{level}>{heading_text}</h{level}>")
-    return html_lines
-
-def convert_lists_to_html(md_content):
-    """
-    Convert Markdown unordered lists (syntax: - item) to HTML format.
+    Convert Markdown headers (# item), unordered lists (- item) and
+    ordered lists (* item) to HTML format.
     """
 
     html_lines = []
     in_list = False
+    ol_list = False
 
+    # Remove potential space before the item
     for line in md_content:
         stripped = line.lstrip()
-        if stripped.startswith('- '):
-            if not in_list:
-                html_lines.append("<ul>")
-                in_list = True
-            item_text = stripped[2:].strip()
-            html_lines.append(f"<li>{item_text}</li>")
-        else:
-            if in_list:
-                html_lines.append("</ul>")
-                in_list = False
 
-    # Close list if file ends with a list
-    if in_list:
+        # For headers
+        if stripped.startswith('#'):
+
+            # Close any open lists
+            if ul_list:
+                html_lines.append("</ul>")
+                ul_list = False
+            if ol_list:
+                html_lines.append("</ol>")
+                ol_list = False
+
+            level = 0
+            while level < len(stripped) and stripped[level] == '#':
+                level += 1
+            heading_text = stripped[level:].lstrip()
+            html_lines.append(f"<h{level}>{heading_text}</h{level}>")
+
+        # For Unordered lists
+        elif stripped.startswith('- '):
+            # Close ordered list if open
+            if ol_list:
+                html_lines.append("</ol>")
+                ol_list = False
+            if not ul_list:
+                html_lines.append("<ul>")
+                ul_list = True
+            html_lines.append(f"<li>{stripped[2:].strip()}</li>")
+
+        # For Ordered lists
+        elif stripped.startswith('* '):
+            # Close unordered list if open
+            if ul_list:
+                html_lines.append("</ul>")
+                ul_list = False
+            if not ol_list:
+                html_lines.append("<ol>")
+                ol_list = True
+            html_lines.append(f"<li>{stripped[2:].strip()}</li>")
+
+        # Other situations
+        else:
+            if ul_list:
+                html_lines.append("</ul>")
+                ul_list = False
+            if ol_list:
+                html_lines.append("</ol>")
+                ol_list = False
+            # ignore other lines
+
+    # Close any open lists at EOF
+    if ul_list:
         html_lines.append("</ul>")
+    if ol_list:
+        html_lines.append("</ol>")
 
     return html_lines
 
@@ -84,11 +100,7 @@ def main():
     with open(markdown_file, 'r', encoding='utf-8') as f:
         md_lines = f.readlines()
 
-    "Convert Heading to HTML"
-    html_lines = convert_headings_to_html(md_lines)
-
-    "Convert lists to HTML"
-    html_lines += convert_lists_to_html(md_lines)
+    html_lines = convert_to_html(md_lines)
 
     with open(html_file, 'w', encoding='utf-8') as f:
         for line in html_lines:
