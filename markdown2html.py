@@ -3,13 +3,13 @@
 markdown2html.py
 
 Checks command-line arguments and validates the existence
-of a Markdown file before HTML conversion.
+of a Markdown file then do HTML conversion.
 
-Currently, the sript only converts headings.
 """
 
 import sys
 import os
+
 
 def convert_headings_to_html(md_content):
     """
@@ -38,6 +38,32 @@ def convert_headings_to_html(md_content):
                 html_lines.append(f"<h{level}>{heading_text}</h{level}>")
     return html_lines
 
+def convert_lists_to_html(md_content):
+    """
+    Convert Markdown unordered lists (syntax: - item) to HTML format.
+    """
+
+    html_lines = []
+
+    for line in md_content:
+        stripped = line.lstrip()
+        if stripped.startswith('- '):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            item_text = stripped[2:].strip()
+            html_lines.append(f"<li>{item_text}</li>")
+        else:
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+
+    # Close list if file ends with a list
+    if in_list:
+        html_lines.append("</ul>")
+
+    return html_lines
+
 def main():
     """Function that validates arguments and input file."""
     if len(sys.argv) < 3:
@@ -57,7 +83,11 @@ def main():
     with open(markdown_file, 'r', encoding='utf-8') as f:
         md_lines = f.readlines()
 
+    "Convert Heading to HTML"
     html_lines = convert_headings_to_html(md_lines)
+
+    "Convert lists to HTML"
+    html_lines += convert_lists_to_html(md_lines)
 
     with open(html_file, 'w', encoding='utf-8') as f:
         for line in html_lines:
