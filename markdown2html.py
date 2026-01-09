@@ -44,6 +44,7 @@ def convert_lists_to_html(md_content):
     """
 
     html_lines = []
+    in_list = False
 
     for line in md_content:
         stripped = line.lstrip()
