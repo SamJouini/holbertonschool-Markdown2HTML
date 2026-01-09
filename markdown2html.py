@@ -52,7 +52,7 @@ def main():
     if not os.path.exists(markdown_file):
         print(f"Missing {markdown_file}", file=sys.stderr)
         sys.exit(1)
-        
+
     with open(markdown_file, 'r', encoding='utf-8') as f:
         md_lines = f.readlines()
 
@@ -63,7 +63,6 @@ def main():
             f.write(line + '\n')
 
     sys.exit(0)
-
 
 if __name__ == "__main__":
     main()
