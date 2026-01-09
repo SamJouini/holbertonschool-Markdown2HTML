@@ -26,15 +26,15 @@ def convert_headings_to_html(md_content):
 
     for line in md_content:
         stripped = line.lstrip()
-        if line.startswith('#'):
+        if stripped.startswith('#'):
             # Count the number of '#' at the start (heading level)
             level = 0
-            while level < len(line) and line[level] == '#':
+            while level < len(stripped) and stripped[level] == '#':
                 level += 1
             # Only consider headings level 1-6
             if 1 <= level <= 6:
                 # Remove leading '#' and possible space
-                heading_text = line[level:].lstrip()
+                heading_text = stripped[level:].lstrip()
                 html_lines.append(f"<h{level}>{heading_text}</h{level}>")
     return html_lines
 
@@ -77,7 +77,7 @@ def main():
     markdown_file = sys.argv[1]
     html_file = sys.argv[2]
 
-    if not os.path.exists(markdown_file):
+    if not os.path.isfile(markdown_file):
         print(f"Missing {markdown_file}", file=sys.stderr)
         sys.exit(1)
 
