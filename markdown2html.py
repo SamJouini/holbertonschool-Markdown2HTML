@@ -17,7 +17,7 @@ def convert_to_html(md_content):
     """
 
     html_lines = []
-    in_list = False
+    ul_list = False
     ol_list = False
 
     # Remove potential space before the item
