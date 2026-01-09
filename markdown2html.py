@@ -4,11 +4,38 @@ markdown2html.py
 
 Checks command-line arguments and validates the existence
 of a Markdown file before HTML conversion.
+
+Currently, the sript only converts headings.
 """
 
 import sys
 import os
 
+def convert_headings_to_html(md_content):
+    """
+    Convert Markdown headings (# to ######) to HTML <h1> to <h6>.
+
+    Args:
+        md_content (list of str): Lines of Markdown text
+
+    Returns:
+        list of str: Lines of HTML text
+    """
+
+    html_lines = []
+
+    for line in md_content:
+        if line.startswith('#'):
+            # Count the number of '#' at the start (heading level)
+            level = 0
+            while level < len(line) and line[level] == '#':
+                level += 1
+            # Only consider headings level 1-6
+            if 1 <= level <= 6:
+                # Remove leading '#' and possible space
+                heading_text = line[level:].lstrip()
+                html_lines.append(f"<h{level}>{heading_text}</h{level}>")
+    return html_lines
 
 def main():
     """Function that validates arguments and input file."""
