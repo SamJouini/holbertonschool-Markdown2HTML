@@ -19,21 +19,32 @@ def convert_to_html(md_content):
     html_lines = []
     ul_list = False
     ol_list = False
+    in_paragraph = False
 
     # Remove potential space before the item
     for line in md_content:
         stripped = line.lstrip()
 
+        # Skip completely empty lines but close paragraph if open
+        if not stripped:
+            if in_paragraph:
+                html_lines.append("</p>")
+                in_paragraph = False
+            continue
+
         # For headers
         if stripped.startswith('#'):
 
-            # Close any open lists
+            # Close any open lists or paragraph
             if ul_list:
                 html_lines.append("</ul>")
                 ul_list = False
             if ol_list:
                 html_lines.append("</ol>")
                 ol_list = False
+            if in_paragraph:
+                html_lines.append("</p>")
+                in_paragraph = False
 
             level = 0
             while level < len(stripped) and stripped[level] == '#':
@@ -43,10 +54,13 @@ def convert_to_html(md_content):
 
         # For Unordered lists
         elif stripped.startswith('- '):
-            # Close ordered list if open
+            # Close ordered list or paragraph if open
             if ol_list:
                 html_lines.append("</ol>")
                 ol_list = False
+            if in_paragraph:
+                html_lines.append("</p>")
+                in_paragraph = False
             if not ul_list:
                 html_lines.append("<ul>")
                 ul_list = True
@@ -54,30 +68,39 @@ def convert_to_html(md_content):
 
         # For Ordered lists
         elif stripped.startswith('* '):
-            # Close unordered list if open
+            # Close unordered list or paragraph if open
             if ul_list:
                 html_lines.append("</ul>")
                 ul_list = False
+            if in_paragraph:
+                html_lines.append("</p>")
+                in_paragraph = False
             if not ol_list:
                 html_lines.append("<ol>")
                 ol_list = True
             html_lines.append(f"<li>{stripped[2:].strip()}</li>")
 
-        # Other situations
+        # For Paragraphes
         else:
+            # Close ordered or unordered list if open
             if ul_list:
                 html_lines.append("</ul>")
                 ul_list = False
             if ol_list:
                 html_lines.append("</ol>")
                 ol_list = False
-            # ignore other lines
+            if not in_paragraph:
+                html_lines.append("<p>")
+                in_paragraph = True
+            html_lines.append(stripped)
 
-    # Close any open lists at EOF
+    # Close any open items at EOF
     if ul_list:
         html_lines.append("</ul>")
     if ol_list:
         html_lines.append("</ol>")
+    if in_paragraph:
+        html_lines.append("</p>")
 
     return html_lines
 
