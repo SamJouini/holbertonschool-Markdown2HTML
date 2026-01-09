@@ -10,6 +10,31 @@ of a Markdown file then do HTML conversion.
 import sys
 import os
 
+def format_conversion(text):
+    """
+    Convert Markdown bold (**text**) and italic (__text__) with HTML tags.
+    """
+
+    # Replace bold: **text** with <b>text</b>
+    while '**' in text:
+        start = text.find('**')
+        end = text.find('**', start + 2)
+        if start != -1 and end != -1:
+            text = text[:start] + '<b>' + text[start+2:end] + '</b>' + text[end+2:]
+        else:
+            break
+
+    # Replace italic: __text__ with <em>text</em>
+    while '__' in text:
+        start = text.find('__')
+        end = text.find('__', start + 2)
+        if start != -1 and end != -1:
+            text = text[:start] + '<em>' + text[start+2:end] + '</em>' + text[end+2:]
+        else:
+            break
+
+    return text
+
 def convert_to_html(md_content):
     """
     Convert Markdown headers (# item), unordered lists (- item) and
@@ -123,7 +148,11 @@ def main():
     with open(markdown_file, 'r', encoding='utf-8') as f:
         md_lines = f.readlines()
 
+    # Handle headers, lists and paragraphes
     html_lines = convert_to_html(md_lines)
+
+    # Handle text format (bolld and italics)
+    html_lines = format_conversion(md_lines)
 
     with open(html_file, 'w', encoding='utf-8') as f:
         for line in html_lines:
