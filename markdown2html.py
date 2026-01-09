@@ -152,7 +152,7 @@ def main():
     html_lines = convert_to_html(md_lines)
 
     # Handle text format (bolld and italics)
-    html_lines = format_conversion(md_lines)
+    html_lines = [format_conversion(line) for line in html_lines]
 
     with open(html_file, 'w', encoding='utf-8') as f:
         for line in html_lines:
