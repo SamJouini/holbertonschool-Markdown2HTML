@@ -25,6 +25,7 @@ def convert_headings_to_html(md_content):
     html_lines = []
 
     for line in md_content:
+        stripped = line.lstrip()
         if line.startswith('#'):
             # Count the number of '#' at the start (heading level)
             level = 0
