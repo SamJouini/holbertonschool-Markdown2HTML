@@ -9,10 +9,12 @@ of a Markdown file then do HTML conversion.
 
 import sys
 import os
+import hashlib
 
 def format_conversion(text):
     """
-    Convert Markdown bold (**text**) and italic (__text__) with HTML tags.
+    Convert Markdown bold (**text**), italic (__text__) , MD5 [[text]] 
+    and remove c/C  ((text)) with HTML tags.
     """
 
     # Replace bold: **text** with <b>text</b>
@@ -30,6 +32,28 @@ def format_conversion(text):
         end = text.find('__', start + 2)
         if start != -1 and end != -1:
             text = text[:start] + '<em>' + text[start+2:end] + '</em>' + text[end+2:]
+        else:
+            break
+
+    # Replace: [[text]] to MD5 hash
+    while '[[' in text:
+        start = text.find('[[')
+        end = text.find(']]', start + 2)
+        if start != -1 and end != -1:
+            content = text[start + 2:end]
+            md5_hash = hashlib.md5(content.encode()).hexdigest()
+            text = text[:start] + md5_hash + text[end + 2:]
+        else:
+            break
+
+    # Replace ((text)) by removing c/C
+    while '((' in text:
+        start = text.find('((')
+        end = text.find('))', start + 2)
+        if start != -1 and end != -1:
+            content = text[start + 2:end]
+            filtered = ''.join(ch for ch in content if ch.lower() != 'c')
+            text = text[:start] + filtered + text[end + 2:]
         else:
             break
 
@@ -131,7 +155,7 @@ def convert_to_html(md_content):
 
 def main():
     """Function that validates arguments and input file."""
-    if len(sys.argv) < 3:
+    if len(sys.argv) != 3:
         print(
             "Usage: ./markdown2html.py README.md README.html",
             file=sys.stderr
