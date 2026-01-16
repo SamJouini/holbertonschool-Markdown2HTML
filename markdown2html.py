@@ -11,6 +11,7 @@ import sys
 import os
 import hashlib
 
+
 def format_conversion(text):
     """
     Convert Markdown bold (**text**), italic (__text__) , MD5 [[text]] 
@@ -22,7 +23,8 @@ def format_conversion(text):
         start = text.find('**')
         end = text.find('**', start + 2)
         if start != -1 and end != -1:
-            text = text[:start] + '<b>' + text[start+2:end] + '</b>' + text[end+2:]
+            text = text[:start] + '<b>' + \
+                text[start+2:end] + '</b>' + text[end+2:]
         else:
             break
 
@@ -31,7 +33,8 @@ def format_conversion(text):
         start = text.find('__')
         end = text.find('__', start + 2)
         if start != -1 and end != -1:
-            text = text[:start] + '<em>' + text[start+2:end] + '</em>' + text[end+2:]
+            text = text[:start] + '<em>' + \
+                text[start+2:end] + '</em>' + text[end+2:]
         else:
             break
 
@@ -58,6 +61,7 @@ def format_conversion(text):
             break
 
     return text
+
 
 def convert_to_html(md_content):
     """
@@ -153,6 +157,7 @@ def convert_to_html(md_content):
 
     return html_lines
 
+
 def main():
     """Function that validates arguments and input file."""
     if len(sys.argv) != 3:
@@ -183,6 +188,7 @@ def main():
             f.write(line + '\n')
 
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
